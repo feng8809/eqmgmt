@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>设备管理系统</title>
+    <style>
+        /* 页面整体样式 */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+        }
+        .container {
+            text-align: center;
+            padding: 40px;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(0, 200, 255, 0.2);
+            border-top-color: #00c8ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .title {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #00c8ff;
+        }
+        .message {
+            font-size: 14px;
+            color: #8892b0;
+            margin-bottom: 20px;
+        }
+        .retry-btn {
+            background: linear-gradient(135deg, #00c8ff, #0080ff);
+            color: #fff;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 14px;
+            cursor: pointer;
+            display: none;
+        }
+        .error {
+            color: #ff6b6b;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="spinner" id="spinner"></div>
+        <div class="title" id="title">正在连接设备管理系统</div>
+        <div class="message" id="message">请稍候...</div>
+        <button class="retry-btn" id="retryBtn" onclick="location.reload()">重新连接</button>
+        <div class="error" id="error"></div>
+    </div>
+
+    <script>
+        // 获取URL参数
+        function getParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // 主函数：获取公网地址并跳转
+        async function redirect() {
+            const type = getParam('type') || 'repair'; // repair 或 archive
+            const deviceCode = getParam('deviceCode') || '';
+            
+            try {
+                // 从GitHub Pages读取当前公网地址配置
+                const response = await fetch('config.json?t=' + Date.now(), { cache: 'no-store' });
+                const config = await response.json();
+                
+                if (config.publicUrl && config.publicUrl.trim() !== '') {
+                    // 构建目标URL
+                    const targetUrl = config.publicUrl + '/mobile/' + type + '?deviceCode=' + encodeURIComponent(deviceCode);
+                    document.getElementById('message').textContent = '正在跳转...';
+                    // 跳转到实际页面
+                    window.location.href = targetUrl;
+                } else {
+                    throw new Error('公网地址未配置');
+                }
+            } catch (error) {
+                console.error('跳转失败:', error);
+                document.getElementById('spinner').style.display = 'none';
+                document.getElementById('title').textContent = '连接失败';
+                document.getElementById('message').textContent = '系统可能未启动，请稍后重试';
+                document.getElementById('error').textContent = error.message;
+                document.getElementById('retryBtn').style.display = 'inline-block';
+            }
+        }
+
+        // 页面加载后执行
+        redirect();
+    </script>
+</body>
+</html>
