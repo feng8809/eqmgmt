@@ -93,8 +93,9 @@
                         document.getElementById('title').textContent = '正在打开报修页面';
                     } else if (type === 'archive') {
                         // 手机档案页面
-                        targetUrl = config.publicUrl + '/mobile/archive?deviceCode=' + encodeURIComponent(deviceCode);
-                        document.getElementById('title').textContent = '正在打开设备档案';
+                        const full = getParam('full') === '1' ? '&full=1' : '';
+                        targetUrl = config.publicUrl + '/mobile/archive?deviceCode=' + encodeURIComponent(deviceCode) + full;
+                        document.getElementById('title').textContent = full ? '正在打开设备全部信息' : '正在打开设备维保信息';
                     } else {
                         // PC端系统首页
                         targetUrl = config.publicUrl + '/';
