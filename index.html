@@ -77,7 +77,7 @@
 
         // 主函数：获取公网地址并跳转
         async function redirect() {
-            const type = getParam('type') || 'repair'; // repair 或 archive
+            const type = getParam('type'); // repair / archive / 空（PC端首页）
             const deviceCode = getParam('deviceCode') || '';
             
             try {
@@ -86,8 +86,20 @@
                 const config = await response.json();
                 
                 if (config.publicUrl && config.publicUrl.trim() !== '') {
-                    // 构建目标URL
-                    const targetUrl = config.publicUrl + '/mobile/' + type + '?deviceCode=' + encodeURIComponent(deviceCode);
+                    let targetUrl;
+                    if (type === 'repair') {
+                        // 手机报修页面
+                        targetUrl = config.publicUrl + '/mobile/repair?deviceCode=' + encodeURIComponent(deviceCode);
+                        document.getElementById('title').textContent = '正在打开报修页面';
+                    } else if (type === 'archive') {
+                        // 手机档案页面
+                        targetUrl = config.publicUrl + '/mobile/archive?deviceCode=' + encodeURIComponent(deviceCode);
+                        document.getElementById('title').textContent = '正在打开设备档案';
+                    } else {
+                        // PC端系统首页
+                        targetUrl = config.publicUrl + '/';
+                        document.getElementById('title').textContent = '正在打开设备管理系统';
+                    }
                     document.getElementById('message').textContent = '正在跳转...';
                     // 跳转到实际页面
                     window.location.href = targetUrl;
